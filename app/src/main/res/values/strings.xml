@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dagmar Docházka</string>
+
+    <!-- Minimal strings used by the single-activity WebView wrapper -->
+    <string name="loading">Načítání…</string>
+    <string name="offline">Offline</string>
+    <string name="online">Online</string>
+
+    <string name="status_registering">Registruji zařízení…</string>
+    <string name="status_pending">Zařízení není aktivováno</string>
+    <string name="status_claiming">Kontroluji aktivaci…</string>
+    <string name="status_active">Aktivováno</string>
+
+    <string name="error_network">Nelze se připojit k serveru. Zkontrolujte internet.</string>
+    <string name="error_generic">Došlo k chybě.</string>
+
+    <string name="action_retry">Zkusit znovu</string>
+</resources>
