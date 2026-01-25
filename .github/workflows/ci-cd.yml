@@ -62,14 +62,12 @@ jobs:
       - name: Show artifacts
         run: ls -l app/build/outputs/apk/release
       - name: Upload APK to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          password: ${{ secrets.DEPLOY_PASS }}
-          source: "app/build/outputs/apk/release/app-release.apk"
-          target: /tmp/
-          strip_components: 4
+        run: scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app/build/outputs/apk/release/app-release.apk ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/app-release.apk
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PASS: ${{ secrets.DEPLOY_PASS }}
+        shell: bash
       - name: Deploy APK
         uses: appleboy/ssh-action@v1.2.0
         with:
