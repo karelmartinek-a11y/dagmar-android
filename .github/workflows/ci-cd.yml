@@ -61,13 +61,15 @@ jobs:
           fi
       - name: Show artifacts
         run: ls -l app/build/outputs/apk/release
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
       - name: Upload APK to server
-        run: scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app/build/outputs/apk/release/app-release.apk ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/app-release.apk
+        run: |
+          sshpass -p "${DEPLOY_PASS}" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app/build/outputs/apk/release/app-release.apk ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/app-release.apk
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_PASS: ${{ secrets.DEPLOY_PASS }}
-        shell: bash
       - name: Deploy APK
         uses: appleboy/ssh-action@v1.2.0
         with:
