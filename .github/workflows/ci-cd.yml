@@ -37,6 +37,23 @@ jobs:
           DAGMAR_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           ./gradlew assembleRelease
+      - name: Sign APK (fallback)
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          APK_IN=app/build/outputs/apk/release/app-release-unsigned.apk
+          APK_OUT=app/build/outputs/apk/release/app-release.apk
+          if [ -f "$APK_IN" ]; then
+            /usr/local/lib/android/sdk/build-tools/34.0.0/apksigner sign \
+              --ks /tmp/keystore.jks \
+              --ks-pass pass:$STORE_PASSWORD \
+              --key-pass pass:$KEY_PASSWORD \
+              --ks-key-alias $KEY_ALIAS \
+              --out "$APK_OUT" \
+              "$APK_IN"
+          fi
       - name: Show artifacts
         run: ls -l app/build/outputs/apk/release
       - name: Upload APK to server
