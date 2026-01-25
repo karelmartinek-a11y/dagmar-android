@@ -45,8 +45,8 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           password: ${{ secrets.DEPLOY_PASS }}
-          source: "app/build/outputs/apk/release/*.apk"
-          target: /tmp/
+          source: "app/build/outputs/apk/release/app-release.apk"
+          target: /tmp/dagmar-app-release.apk
       - name: Deploy APK
         uses: appleboy/ssh-action@v1.2.0
         with:
