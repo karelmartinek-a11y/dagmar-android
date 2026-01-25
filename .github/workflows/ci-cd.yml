@@ -29,14 +29,15 @@ jobs:
           DAGMAR_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           ./gradlew test
-      - name: Assemble release
+      - name: Assemble debug+release
         env:
           DAGMAR_STORE_FILE: /tmp/keystore.jks
           DAGMAR_STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           DAGMAR_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           DAGMAR_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          ./gradlew assembleRelease
+          ./gradlew clean :app:assembleDebug --stacktrace
+          ./gradlew :app:assembleRelease --stacktrace
       - name: Sign APK (fallback)
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
@@ -66,6 +67,7 @@ jobs:
       - name: Upload APK to server
         run: |
           sshpass -p "${DEPLOY_PASS}" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app/build/outputs/apk/release/app-release.apk ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/app-release.apk
+          sshpass -p "${DEPLOY_PASS}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "ls -l /tmp/app-release.apk"
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
