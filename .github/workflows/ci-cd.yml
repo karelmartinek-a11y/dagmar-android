@@ -13,14 +13,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install Android SDK packages
-        run: |
-          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-          yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-          yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
+      - uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          build-tools: 34.0.0
+          cmdline-tools: latest
       - name: Prepare keystore
         run: |
           echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > /tmp/keystore.jks
+          test -s /tmp/keystore.jks
       - name: Unit tests
         env:
           DAGMAR_STORE_FILE: /tmp/keystore.jks
