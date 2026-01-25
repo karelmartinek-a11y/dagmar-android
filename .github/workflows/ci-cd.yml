@@ -13,12 +13,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
-        with:
-          packages: |-
-            platform-tools
-            platforms;android-34
-            build-tools;34.0.0
+      - name: Install Android SDK packages
+        run: |
+          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+          yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
       - name: Prepare keystore
         run: |
           echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > /tmp/keystore.jks
