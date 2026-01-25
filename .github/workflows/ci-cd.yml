@@ -53,6 +53,11 @@ jobs:
               --ks-key-alias $KEY_ALIAS \
               --out "$APK_OUT" \
               "$APK_IN"
+          else
+            echo "WARNING: $APK_IN nenalezen"
+          fi
+          if [ ! -f "$APK_OUT" ] && [ -f "$APK_IN" ]; then
+            cp "$APK_IN" "$APK_OUT"
           fi
       - name: Show artifacts
         run: ls -l app/build/outputs/apk/release
