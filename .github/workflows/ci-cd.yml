@@ -13,9 +13,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
       - uses: android-actions/setup-android@v3
         with:
-          cmdline-tools-version: latest
+          cmdline-tools-version: 12266719
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
           packages: "platforms;android-34 build-tools;34.0.0 platform-tools"
@@ -30,16 +31,7 @@ jobs:
           DAGMAR_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           DAGMAR_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          ./gradlew test
-      - name: Assemble debug+release
-        env:
-          DAGMAR_STORE_FILE: /tmp/keystore.jks
-          DAGMAR_STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          DAGMAR_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          DAGMAR_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          ./gradlew clean :app:assembleDebug --stacktrace
-          ./gradlew :app:assembleRelease --stacktrace
+          ./gradlew clean :app:test :app:assembleDebug :app:assembleRelease --stacktrace
       - name: Sign APK (fallback)
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
