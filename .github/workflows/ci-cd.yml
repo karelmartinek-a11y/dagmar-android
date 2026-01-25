@@ -69,8 +69,9 @@ jobs:
       - name: Upload APK to server
         run: |
           test -f app/build/outputs/apk/release/app-release.apk
-          sshpass -p "${DEPLOY_PASS}" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app/build/outputs/apk/release/app-release.apk ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/app-release.apk
-          sshpass -p "${DEPLOY_PASS}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "ls -l /tmp/app-release.apk"
+          sshpass -p "${DEPLOY_PASS}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "rm -rf ~/upload-dagmar && mkdir -p ~/upload-dagmar"
+          sshpass -p "${DEPLOY_PASS}" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app/build/outputs/apk/release/app-release.apk ${DEPLOY_USER}@${DEPLOY_HOST}:~/upload-dagmar/app-release.apk
+          sshpass -p "${DEPLOY_PASS}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "ls -l ~/upload-dagmar"
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -83,9 +84,10 @@ jobs:
           password: ${{ secrets.DEPLOY_PASS }}
           script: |
             set -e
-            ls -l /tmp/*.apk || true
+            ls -l ~/upload-dagmar || true
+            test -f ~/upload-dagmar/app-release.apk
             install -d /var/www/dagmar/download
-            mv /tmp/app-release.apk /tmp/dagmar.apk
-            cp /tmp/dagmar.apk /var/www/dagmar/download/dagmar.apk
+            install -m 0644 ~/upload-dagmar/app-release.apk /var/www/dagmar/download/dagmar.apk
             cp /var/www/dagmar/download/dagmar.apk /var/www/dagmar/download/dochazka-dagmar.apk
             chown www-data:www-data /var/www/dagmar/download/dagmar.apk /var/www/dagmar/download/dochazka-dagmar.apk
+            rm -rf ~/upload-dagmar
