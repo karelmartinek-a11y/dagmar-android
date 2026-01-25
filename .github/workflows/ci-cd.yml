@@ -22,6 +22,14 @@ jobs:
       - name: Prepare keystore
         run: |
           echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > /tmp/keystore.jks
+      - name: Unit tests
+        env:
+          DAGMAR_STORE_FILE: /tmp/keystore.jks
+          DAGMAR_STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          DAGMAR_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          DAGMAR_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew test
       - name: Assemble release
         env:
           DAGMAR_STORE_FILE: /tmp/keystore.jks
