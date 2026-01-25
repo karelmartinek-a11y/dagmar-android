@@ -66,6 +66,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y sshpass
       - name: Upload APK to server
         run: |
+          test -f app/build/outputs/apk/release/app-release.apk
           sshpass -p "${DEPLOY_PASS}" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app/build/outputs/apk/release/app-release.apk ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/app-release.apk
           sshpass -p "${DEPLOY_PASS}" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "ls -l /tmp/app-release.apk"
         env:
@@ -80,8 +81,9 @@ jobs:
           password: ${{ secrets.DEPLOY_PASS }}
           script: |
             set -e
+            ls -l /tmp/*.apk || true
             install -d /var/www/dagmar/download
-            mv /tmp/dagmar-app-release.apk /tmp/dagmar.apk
+            mv /tmp/app-release.apk /tmp/dagmar.apk
             cp /tmp/dagmar.apk /var/www/dagmar/download/dagmar.apk
             cp /var/www/dagmar/download/dagmar.apk /var/www/dagmar/download/dochazka-dagmar.apk
             chown www-data:www-data /var/www/dagmar/download/dagmar.apk /var/www/dagmar/download/dochazka-dagmar.apk
