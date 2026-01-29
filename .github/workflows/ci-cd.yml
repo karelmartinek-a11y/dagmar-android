@@ -76,7 +76,7 @@ jobs:
             set -e
             SRC=/tmp/app-release.apk
             if [ -d "$SRC" ]; then
-              SRC="$SRC/app-release.apk"
+              SRC=$(find "$SRC" -type f -name '*.apk' | head -n 1)
             fi
             test -f "$SRC"
             install -d /var/www/dagmar/download
@@ -85,3 +85,4 @@ jobs:
             cp /var/www/dagmar/download/DagmarApp.apk /var/www/dagmar/download/dagmar.apk
             chown www-data:www-data /var/www/dagmar/download/DagmarApp.apk /var/www/dagmar/download/dochazka-dagmar.apk /var/www/dagmar/download/dagmar.apk
             rm -f "$SRC"
+            rm -rf /tmp/app-release.apk
