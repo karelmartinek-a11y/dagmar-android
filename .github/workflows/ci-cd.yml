@@ -70,9 +70,12 @@ jobs:
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
-          password: ${{ secrets.DEPLOY_PASS }}
+            password: ${{ secrets.DEPLOY_PASS }}
           script: |
             set -e
+            if [ -d /tmp/app-release.apk ]; then
+              mv /tmp/app-release.apk/app-release.apk /tmp/app-release.apk && rmdir /tmp/app-release.apk || true
+            fi
             test -f /tmp/app-release.apk
             install -d /var/www/dagmar/download
             install -m 0644 /tmp/app-release.apk /var/www/dagmar/download/DagmarApp.apk
