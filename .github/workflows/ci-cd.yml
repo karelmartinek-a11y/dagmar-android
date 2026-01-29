@@ -74,11 +74,15 @@ jobs:
           password: ${{ secrets.DEPLOY_PASS }}
           script: |
             set -e
+            ls -R /tmp/app-release.apk || true
             SRC=/tmp/app-release.apk
             if [ -d "$SRC" ]; then
               SRC=$(find "$SRC" -type f -name '*.apk' | head -n 1)
             fi
-            test -f "$SRC"
+            if [ -z "$SRC" ] || [ ! -f "$SRC" ]; then
+              echo \"APK nenalezen ve /tmp/app-release.apk\" >&2
+              exit 1
+            fi
             install -d /var/www/dagmar/download
             install -m 0644 "$SRC" /var/www/dagmar/download/DagmarApp.apk
             cp /var/www/dagmar/download/DagmarApp.apk /var/www/dagmar/download/dochazka-dagmar.apk
