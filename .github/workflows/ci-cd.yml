@@ -74,13 +74,14 @@ jobs:
           password: ${{ secrets.DEPLOY_PASS }}
           script: |
             set -e
-            if [ -d /tmp/app-release.apk ]; then
-              mv /tmp/app-release.apk/app-release.apk /tmp/app-release.apk && rmdir /tmp/app-release.apk || true
+            SRC=/tmp/app-release.apk
+            if [ -d "$SRC" ]; then
+              SRC="$SRC/app-release.apk"
             fi
-            test -f /tmp/app-release.apk
+            test -f "$SRC"
             install -d /var/www/dagmar/download
-            install -m 0644 /tmp/app-release.apk /var/www/dagmar/download/DagmarApp.apk
+            install -m 0644 "$SRC" /var/www/dagmar/download/DagmarApp.apk
             cp /var/www/dagmar/download/DagmarApp.apk /var/www/dagmar/download/dochazka-dagmar.apk
             cp /var/www/dagmar/download/DagmarApp.apk /var/www/dagmar/download/dagmar.apk
             chown www-data:www-data /var/www/dagmar/download/DagmarApp.apk /var/www/dagmar/download/dochazka-dagmar.apk /var/www/dagmar/download/dagmar.apk
-            rm -f /tmp/app-release.apk
+            rm -f "$SRC"
