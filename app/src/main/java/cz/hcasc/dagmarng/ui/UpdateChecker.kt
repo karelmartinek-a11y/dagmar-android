@@ -4,9 +4,20 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -97,25 +108,42 @@ fun UpdateCheckGate(
 
     val u = update
     if (u != null && !dismissed) {
-        AlertDialog(
-            onDismissRequest = { setDismissed(true) },
-            title = { Text("Je dostupná nová verze Dagmar NG") },
-            text = {
-                Text(
-                    buildString {
-                        append("Na serveru je novější verze aplikace.")
-                        if (!u.versionName.isNullOrBlank()) append("\n\nVerze: ${u.versionName}")
-                        if (!u.message.isNullOrBlank()) append("\n\n${u.message}")
-                        append("\n\nChcete stáhnout aktualizaci?")
-                    }
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { openUrl(context, u.apkUrl) }) { Text("Aktualizovat") }
-            },
-            dismissButton = {
-                TextButton(onClick = { setDismissed(true) }) { Text("Později") }
-            }
+        UpdateBanner(
+            info = u,
+            onUpdate = { openUrl(context, u.apkUrl) },
+            onDismiss = { setDismissed(true) }
         )
+    }
+}
+
+@Composable
+private fun UpdateBanner(info: UpdateInfo, onUpdate: () -> Unit, onDismiss: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp)
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text("Je dostupná nová verze Dagmar NG", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.padding(vertical = 4.dp))
+            Text(
+                buildString {
+                    append("Na serveru je novější verze aplikace.")
+                    if (!info.versionName.isNullOrBlank()) append(" Verze: ${info.versionName}.")
+                    if (!info.message.isNullOrBlank()) append(" ${info.message}")
+                },
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(Modifier.padding(vertical = 6.dp))
+            Divider()
+            Spacer(Modifier.padding(vertical = 6.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TextButton(onClick = onDismiss) { Text("Skrýt") }
+                Button(onClick = onUpdate) { Text("Stáhnout") }
+            }
+        }
     }
 }
