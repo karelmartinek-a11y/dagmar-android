@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,7 +31,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.weight
 import cz.hcasc.dagmarng.net.Api
 import cz.hcasc.dagmarng.net.Api.EmploymentTemplate
 import cz.hcasc.dagmarng.util.AttendanceRowLike
@@ -418,7 +418,7 @@ fun EmployeeScreen(
 }
 
 @Composable
-private fun TimeField(
+private fun RowScope.TimeField(
     label: String,
     value: String,
     planned: String?,
