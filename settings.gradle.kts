@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "dagmar-android"
+rootProject.name = "dagmar-android-ng"
 include(":app")

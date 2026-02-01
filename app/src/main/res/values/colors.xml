@@ -1,6 +1,7 @@
 <resources>
     <color name="dagmar_primary">#0B2B40</color>
-    <color name="dagmar_primary_dark">#081E2D</color>
+    <color name="dagmar_primary_dark">#000000</color>
     <color name="dagmar_accent">#1D6D8C</color>
     <color name="dagmar_surface">#FFFFFF</color>
+    <color name="ic_launcher_background">#0B2B40</color>
 </resources>
