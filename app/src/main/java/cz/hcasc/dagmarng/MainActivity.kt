@@ -81,7 +81,8 @@ private fun DagmarApp(baseUrl: String, store: SecureStore) {
     var afternoonCutoff by remember { mutableStateOf<String?>(null) }
 
     var state by remember { mutableStateOf(InstanceState.UNKNOWN) }
-    var busy by remember { mutableStateOf(true) }
+    var busy by remember { mutableStateOf(false) }
+    var regErrorShown by remember { mutableStateOf(false) }
 
     fun ensureFingerprint(): String {
         val fp = store.getDeviceFingerprint()
@@ -92,6 +93,7 @@ private fun DagmarApp(baseUrl: String, store: SecureStore) {
     }
 
     suspend fun registerIfNeeded(forceNew: Boolean = false) {
+        if (deviceName.isBlank()) return
         busy = true
         try {
             if (forceNew) {
@@ -123,8 +125,12 @@ private fun DagmarApp(baseUrl: String, store: SecureStore) {
                 }
                 instanceId = resp.instanceId
             }
+            regErrorShown = false
         } catch (_: Exception) {
-            snackbar.showSnackbar("Registrace zařízení se nepodařila (zkontrolujte internet).")
+            if (!regErrorShown) {
+                snackbar.showSnackbar("Registrace zařízení se nepodařila (zkontrolujte internet).")
+                regErrorShown = true
+            }
         } finally {
             busy = false
         }
@@ -165,14 +171,19 @@ private fun DagmarApp(baseUrl: String, store: SecureStore) {
     }
 
     LaunchedEffect(Unit) {
-        registerIfNeeded(forceNew = false)
         while (true) {
-            if (instanceId.isNullOrBlank()) {
-                registerIfNeeded(forceNew = false)
-                delay(4_000)
+            if (deviceName.isBlank()) {
+                busy = false
+                delay(500)
                 continue
             }
-            refreshStatusAndClaimIfNeeded()
+
+            if (instanceId.isNullOrBlank()) {
+                registerIfNeeded(forceNew = false)
+            } else {
+                refreshStatusAndClaimIfNeeded()
+            }
+
             if (!instanceToken.isNullOrBlank()) break
             if (state == InstanceState.REVOKED || state == InstanceState.DEACTIVATED) break
             delay(4_000)
