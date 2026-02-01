@@ -46,19 +46,22 @@ private suspend fun fetchUpdateInfo(baseUrl: String): UpdateInfo? = withContext(
                 .header("Cache-Control", "no-store")
                 .build()
             httpUpdate.newCall(req).execute().use { resp ->
-                if (!resp.isSuccessful) continue
-                val body = resp.body?.string()?.trim().orEmpty()
-                if (body.isBlank()) continue
-                val json = JSONObject(body)
-                val vc = json.optInt("version_code", -1)
-                val apkUrl = json.optString("apk_url", "")
-                if (vc <= 0 || apkUrl.isBlank()) continue
-                return@withContext UpdateInfo(
-                    versionCode = vc,
-                    versionName = json.optString("version_name", null),
-                    apkUrl = apkUrl,
-                    message = json.optString("message", null)
-                )
+                if (resp.isSuccessful) {
+                    val body = resp.body?.string()?.trim().orEmpty()
+                    if (body.isNotBlank()) {
+                        val json = JSONObject(body)
+                        val vc = json.optInt("version_code", -1)
+                        val apkUrl = json.optString("apk_url", "")
+                        if (vc > 0 && apkUrl.isNotBlank()) {
+                            return@withContext UpdateInfo(
+                                versionCode = vc,
+                                versionName = json.optString("version_name", null),
+                                apkUrl = apkUrl,
+                                message = json.optString("message", null)
+                            )
+                        }
+                    }
+                }
             }
         } catch (_: Exception) {
             // ignore and try next

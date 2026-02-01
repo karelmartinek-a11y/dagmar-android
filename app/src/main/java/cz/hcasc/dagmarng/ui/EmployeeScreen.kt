@@ -26,10 +26,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.weight
 import cz.hcasc.dagmarng.net.Api
 import cz.hcasc.dagmarng.net.Api.EmploymentTemplate
 import cz.hcasc.dagmarng.util.AttendanceRowLike
@@ -88,20 +89,20 @@ private fun toDowLabelCs(dateIso: String): String {
 private fun normalizeTime(value: String): String {
     val v = value.trim()
     if (v.isBlank()) return ""
-    if (Regex("^\d{4}$").matches(v)) {
+    if (Regex("""^\d{4}$""").matches(v)) {
         val hh = v.substring(0, 2).toIntOrNull() ?: return v
         val mm = v.substring(2, 4).toIntOrNull() ?: return v
         if (hh in 0..23 && mm in 0..59) return "${pad2(hh)}:${pad2(mm)}"
         return v
     }
-    val colon = Regex("^(\d{1,2}):(\d{2})$").find(v)
+    val colon = Regex("""^(\d{1,2}):(\d{2})$""").find(v)
     if (colon != null) {
         val hh = colon.groupValues[1].toIntOrNull() ?: return v
         val mm = colon.groupValues[2].toIntOrNull() ?: return v
         if (hh in 0..23 && mm in 0..59) return "${pad2(hh)}:${pad2(mm)}"
         return v
     }
-    if (Regex("^\d{1,2}$").matches(v)) {
+    if (Regex("""^\d{1,2}$""").matches(v)) {
         val hh = v.toIntOrNull()
         if (hh != null && hh in 1..23) return "${pad2(hh)}:00"
     }
@@ -111,7 +112,7 @@ private fun normalizeTime(value: String): String {
 private fun isValidTimeOrEmpty(value: String): Boolean {
     val v = normalizeTime(value)
     if (v.isBlank()) return true
-    return Regex("^([01]\d|2[0-3]):([0-5]\d)$").matches(v)
+    return Regex("""^([01]\d|2[0-3]):([0-5]\d)$""").matches(v)
 }
 
 private fun formatHours(mins: Int): String = String.format("%.1f", mins / 60.0)
