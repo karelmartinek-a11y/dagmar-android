@@ -87,7 +87,8 @@ object Api {
             put("device_fingerprint", deviceFingerprint)
             if (deviceInfo != null) put("device_info", deviceInfo)
             if (!displayName.isNullOrBlank()) put("display_name", displayName)
-        }val req = Request.Builder()
+        }
+        val req = Request.Builder()
             .url(BASE_URL + API_PREFIX + "/instances/register")
             .post(payload.toString().toRequestBody(jsonMediaType))
             .header("Accept", "application/json")

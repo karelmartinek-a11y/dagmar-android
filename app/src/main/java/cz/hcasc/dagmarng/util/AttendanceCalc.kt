@@ -28,7 +28,7 @@ private fun pad2(n: Int) = n.toString().padStart(2, '0')
 
 private fun parseTimeToMinutes(hhmm: String?): Int? {
     if (hhmm.isNullOrBlank()) return null
-    val m = Regex("^([0-1]?\d|2[0-3]):([0-5]\d)$").find(hhmm) ?: return null
+    val m = Regex("^([0-1]?\\d|2[0-3]):([0-5]\\d)$").find(hhmm) ?: return null
     val h = m.groupValues[1].toInt()
     val mm = m.groupValues[2].toInt()
     return h * 60 + mm
@@ -47,7 +47,7 @@ private fun minutesToHHMM(mins: Int): String {
 }
 
 private fun isoParts(dateIso: String): Triple<Int, Int, Int>? {
-    val m = Regex("^(\d{4})-(\d{2})-(\d{2})$").find(dateIso) ?: return null
+    val m = Regex("^(\\d{4})-(\\d{2})-(\\d{2})$").find(dateIso) ?: return null
     val y = m.groupValues[1].toInt()
     val mo = m.groupValues[2].toInt()
     val d = m.groupValues[3].toInt()
