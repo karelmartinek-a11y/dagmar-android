@@ -1,4 +1,4 @@
-﻿package cz.hcasc.dagmarng.util
+package cz.hcasc.dagmarng.util
 
 import cz.hcasc.dagmarng.net.Api
 import java.util.Calendar
@@ -27,12 +27,10 @@ data class MonthStats(
 private fun pad2(n: Int) = n.toString().padStart(2, '0')
 
 private fun parseTimeToMinutes(hhmm: String?): Int? {
-    val v = hhmm?.trim() ?: return null
-    val parts = v.split(":")
-    if (parts.size != 2) return null
-    val h = parts[0].toIntOrNull() ?: return null
-    val mm = parts[1].toIntOrNull() ?: return null
-    if (h !in 0..23 || mm !in 0..59) return null
+    if (hhmm.isNullOrBlank()) return null
+    val m = Regex("^([0-1]?\d|2[0-3]):([0-5]\d)$").find(hhmm) ?: return null
+    val h = m.groupValues[1].toInt()
+    val mm = m.groupValues[2].toInt()
     return h * 60 + mm
 }
 
@@ -49,11 +47,10 @@ private fun minutesToHHMM(mins: Int): String {
 }
 
 private fun isoParts(dateIso: String): Triple<Int, Int, Int>? {
-    val parts = dateIso.split("-")
-    if (parts.size != 3) return null
-    val y = parts[0].toIntOrNull() ?: return null
-    val mo = parts[1].toIntOrNull() ?: return null
-    val d = parts[2].toIntOrNull() ?: return null
+    val m = Regex("^(\d{4})-(\d{2})-(\d{2})$").find(dateIso) ?: return null
+    val y = m.groupValues[1].toInt()
+    val mo = m.groupValues[2].toInt()
+    val d = m.groupValues[3].toInt()
     return Triple(y, mo, d)
 }
 
@@ -106,22 +103,22 @@ private fun holidaysForYearCZ(year: Int): HashMap<String, String> {
     holidayCache[year]?.let { return it }
     val map = HashMap<String, String>()
     val fixed = listOf(
-        "01-01" to "NovĂ˝ rok / Den obnovy samostatnĂ©ho ÄŤeskĂ©ho stĂˇtu",
-        "05-01" to "SvĂˇtek prĂˇce",
-        "05-08" to "Den vĂ­tÄ›zstvĂ­",
-        "07-05" to "Cyril a MetodÄ›j",
-        "07-06" to "UpĂˇlenĂ­ mistra Jana Husa",
-        "09-28" to "Den ÄŤeskĂ© stĂˇtnosti",
-        "10-28" to "Vznik samostatnĂ©ho ÄŤeskoslovenskĂ©ho stĂˇtu",
+        "01-01" to "Nový rok / Den obnovy samostatného českého státu",
+        "05-01" to "Svátek práce",
+        "05-08" to "Den vítězství",
+        "07-05" to "Cyril a Metoděj",
+        "07-06" to "Upálení mistra Jana Husa",
+        "09-28" to "Den české státnosti",
+        "10-28" to "Vznik samostatného československého státu",
         "11-17" to "Den boje za svobodu a demokracii",
-        "12-24" to "Ĺ tÄ›drĂ˝ den",
-        "12-25" to "1. svĂˇtek vĂˇnoÄŤnĂ­",
-        "12-26" to "2. svĂˇtek vĂˇnoÄŤnĂ­"
+        "12-24" to "Štědrý den",
+        "12-25" to "1. svátek vánoční",
+        "12-26" to "2. svátek vánoční"
     )
     for ((mmdd, name) in fixed) map["$year-$mmdd"] = name
     val easter = easterSunday(year)
-    map[toIso(addDays(easter, -2))] = "VelkĂ˝ pĂˇtek"
-    map[toIso(addDays(easter, +1))] = "VelikonoÄŤnĂ­ pondÄ›lĂ­"
+    map[toIso(addDays(easter, -2))] = "Velký pátek"
+    map[toIso(addDays(easter, +1))] = "Velikonoční pondělí"
     holidayCache[year] = map
     return map
 }
@@ -180,15 +177,15 @@ private fun overlapMinutes(a0: Int, a1: Int, b0: Int, b1: Int): Int {
 private fun breakLabelFromMinutes(mins: Int): String {
     val h = mins / 60
     val m = mins % 60
-    return "â’$h:${pad2(m)} pauza"
+    return "−$h:${pad2(m)} pauza"
 }
 
 private fun breakTooltipFromWindows(windows: List<BreakWindow>): String {
     if (windows.isEmpty()) return ""
-    val parts = windows.map { "${minutesToHHMM(it.start)}â€“${minutesToHHMM(it.end)}" }
+    val parts = windows.map { "${minutesToHHMM(it.start)}–${minutesToHHMM(it.end)}" }
     val total = windows.size * 30
     val prefix = if (windows.size == 1) "Pauza" else "Pauzy"
-    return "$prefix ${breakLabelFromMinutes(total).replace("â’", "")} (${parts.joinToString(", ")})"
+    return "$prefix ${breakLabelFromMinutes(total).replace("−", "")} (${parts.joinToString(", ")})"
 }
 
 data class AttendanceRowLike(val date: String, val arrivalTime: String?, val departureTime: String?)
@@ -243,4 +240,3 @@ fun computeMonthStats(rows: List<AttendanceRowLike>, template: Api.EmploymentTem
     return if (template != Api.EmploymentTemplate.HPP) MonthStats(totalMins, 0, 0, 0)
     else MonthStats(totalMins, breakMins, afternoonMins, weekendHolidayMins)
 }
-

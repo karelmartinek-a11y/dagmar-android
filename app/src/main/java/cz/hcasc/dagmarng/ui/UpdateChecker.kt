@@ -4,20 +4,9 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -57,22 +46,19 @@ private suspend fun fetchUpdateInfo(baseUrl: String): UpdateInfo? = withContext(
                 .header("Cache-Control", "no-store")
                 .build()
             httpUpdate.newCall(req).execute().use { resp ->
-                if (resp.isSuccessful) {
-                    val body = resp.body?.string()?.trim().orEmpty()
-                    if (body.isNotBlank()) {
-                        val json = JSONObject(body)
-                        val vc = json.optInt("version_code", -1)
-                        val apkUrl = json.optString("apk_url", "")
-                        if (vc > 0 && apkUrl.isNotBlank()) {
-                            return@withContext UpdateInfo(
-                                versionCode = vc,
-                                versionName = json.optString("version_name", null),
-                                apkUrl = apkUrl,
-                                message = json.optString("message", null)
-                            )
-                        }
-                    }
-                }
+                if (!resp.isSuccessful) continue
+                val body = resp.body?.string()?.trim().orEmpty()
+                if (body.isBlank()) continue
+                val json = JSONObject(body)
+                val vc = json.optInt("version_code", -1)
+                val apkUrl = json.optString("apk_url", "")
+                if (vc <= 0 || apkUrl.isBlank()) continue
+                return@withContext UpdateInfo(
+                    versionCode = vc,
+                    versionName = json.optString("version_name", null),
+                    apkUrl = apkUrl,
+                    message = json.optString("message", null)
+                )
             }
         } catch (_: Exception) {
             // ignore and try next
@@ -108,42 +94,25 @@ fun UpdateCheckGate(
 
     val u = update
     if (u != null && !dismissed) {
-        UpdateBanner(
-            info = u,
-            onUpdate = { openUrl(context, u.apkUrl) },
-            onDismiss = { setDismissed(true) }
-        )
-    }
-}
-
-@Composable
-private fun UpdateBanner(info: UpdateInfo, onUpdate: () -> Unit, onDismiss: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp)
-    ) {
-        Column(Modifier.padding(12.dp)) {
-            Text("Je dostupná nová verze Dagmar NG", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.padding(vertical = 4.dp))
-            Text(
-                buildString {
-                    append("Na serveru je novější verze aplikace.")
-                    if (!info.versionName.isNullOrBlank()) append(" Verze: ${info.versionName}.")
-                    if (!info.message.isNullOrBlank()) append(" ${info.message}")
-                },
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(Modifier.padding(vertical = 6.dp))
-            Divider()
-            Spacer(Modifier.padding(vertical = 6.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TextButton(onClick = onDismiss) { Text("Skrýt") }
-                Button(onClick = onUpdate) { Text("Stáhnout") }
+        AlertDialog(
+            onDismissRequest = { setDismissed(true) },
+            title = { Text("Je dostupná nová verze Dagmar NG") },
+            text = {
+                Text(
+                    buildString {
+                        append("Na serveru je novější verze aplikace.")
+                        if (!u.versionName.isNullOrBlank()) append("\n\nVerze: ${u.versionName}")
+                        if (!u.message.isNullOrBlank()) append("\n\n${u.message}")
+                        append("\n\nChcete stáhnout aktualizaci?")
+                    }
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { openUrl(context, u.apkUrl) }) { Text("Aktualizovat") }
+            },
+            dismissButton = {
+                TextButton(onClick = { setDismissed(true) }) { Text("Později") }
             }
-        }
+        )
     }
 }

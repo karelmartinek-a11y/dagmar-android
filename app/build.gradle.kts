@@ -14,7 +14,7 @@ android {
         versionCode = 1
         versionName = "1.0.0"
 
-        buildConfigField("String", "DAGMAR_BASE_URL", "\"https://dagmar.hcasc.cz\"")
+        buildConfigField("String", "DAGMAR_BASE_URL", ""https://dagmar.hcasc.cz"")
     }
 
     buildTypes {

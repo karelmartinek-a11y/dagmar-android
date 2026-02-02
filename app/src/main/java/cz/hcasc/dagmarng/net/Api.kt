@@ -80,20 +80,18 @@ object Api {
         clientType: String,
         deviceFingerprint: String,
         deviceInfo: JSONObject? = null,
-        deviceName: String? = null
+        displayName: String? = null
     ): RegisterResponse = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
             put("client_type", clientType)
             put("device_fingerprint", deviceFingerprint)
             if (deviceInfo != null) put("device_info", deviceInfo)
-        }
-
-        val builder = Request.Builder()
+            if (!displayName.isNullOrBlank()) put("display_name", displayName)
+        }val req = Request.Builder()
             .url(BASE_URL + API_PREFIX + "/instances/register")
             .post(payload.toString().toRequestBody(jsonMediaType))
             .header("Accept", "application/json")
-        if (!deviceName.isNullOrBlank()) builder.header("X-Device-Name", deviceName)
-        val req = builder.build()
+            .build()
 
         http.newCall(req).execute().use { resp ->
             val body = resp.body?.string() ?: ""
