@@ -37,8 +37,9 @@ private suspend fun fetchUpdateInfo(baseUrl: String): UpdateInfo? = withContext(
         baseUrl.trimEnd('/') + "/download/dochazka-dagmar-ng.json",
         baseUrl.trimEnd('/') + "/download/dochazka-dagmar.json"
     )
-    for (url in candidates) {
-        try {
+
+    fun fetchOnce(url: String): UpdateInfo? {
+        return try {
             val req = Request.Builder()
                 .url(url)
                 .get()
@@ -46,14 +47,14 @@ private suspend fun fetchUpdateInfo(baseUrl: String): UpdateInfo? = withContext(
                 .header("Cache-Control", "no-store")
                 .build()
             httpUpdate.newCall(req).execute().use { resp ->
-                if (!resp.isSuccessful) continue
+                if (!resp.isSuccessful) return null
                 val body = resp.body?.string()?.trim().orEmpty()
-                if (body.isBlank()) continue
+                if (body.isBlank()) return null
                 val json = JSONObject(body)
                 val vc = json.optInt("version_code", -1)
                 val apkUrl = json.optString("apk_url", "")
-                if (vc <= 0 || apkUrl.isBlank()) continue
-                return@withContext UpdateInfo(
+                if (vc <= 0 || apkUrl.isBlank()) return null
+                UpdateInfo(
                     versionCode = vc,
                     versionName = json.optString("version_name", null),
                     apkUrl = apkUrl,
@@ -61,8 +62,13 @@ private suspend fun fetchUpdateInfo(baseUrl: String): UpdateInfo? = withContext(
                 )
             }
         } catch (_: Exception) {
-            // ignore and try next
+            null
         }
+    }
+
+    for (url in candidates) {
+        val info = fetchOnce(url)
+        if (info != null) return@withContext info
     }
     null
 }
